@@ -3,7 +3,7 @@ clear all, close all, clc
 
 format long
 %% Import Data
-inertialData = importdata('../data/raw/20210330_sensor-orbit_100RPM/IMU_output.txt');
+inertialData = importdata('../data/raw/20210408-155327_sensor-orbit_100RPM/IMU_output.txt');
 recordedTime = (inertialData(:,1) - inertialData(1,1));
 recordedAcceleration = inertialData(:, [2:4]) - inertialData(1, [2:4]);
 calculatedXVelocity = (cumtrapz(inertialData(:,1), recordedAcceleration(:,1)));
@@ -15,11 +15,11 @@ calculatedZDistance = (cumtrapz(inertialData(:,1), calculatedZVelocity));
 
 %% Extract sampling period selected during acquisition
 readScript = readlines('record_kinematics.py')';
-extractLine = readScript(:,51);
+extractLine = readScript(:,53);
 extractValue = regexp(extractLine,'\d*','Match');
 joinDigits = strjoin(extractValue(:, [1,2]));
 replaceDelimiter = strrep(joinDigits, ' ', '.');
-samplingPeriod = str2num(replaceDelimiter); % Sampling Period
+samplingPeriod = str2num(replaceDelimiter);
 
 %% Interpolate kinematic data because FFT needs evenly spaced samples
 % Note: this is a guess, ideally we would want to change recording script or hardware to have a clock, so acuqisitions occur at set intervals
@@ -32,7 +32,7 @@ ylabel('acceleration [m/s^2]')
 legend('x', 'y', 'z')
 
 %% Compute FFT
-samplingFrequency = 1 / samplingPeriod;                 
+samplingFrequency = 1 / samplingPeriod;
 signalLength = length(interpolatedAcceleration);
 interpolatedTime = (0:signalLength-1) * samplingPeriod;
 
