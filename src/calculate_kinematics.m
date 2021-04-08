@@ -11,7 +11,7 @@ calculatedYVelocity = (cumtrapz(inertialData(:,1), recordedAcceleration(:,2)));
 calculatedZVelocity = (cumtrapz(inertialData(:,1), recordedAcceleration(:,3)));
 calculatedXDistance = (cumtrapz(inertialData(:,1), calculatedXVelocity));
 calculatedYDistance = (cumtrapz(inertialData(:,1), calculatedYVelocity));
-calculatedXDistance = (cumtrapz(inertialData(:,1), calculatedZVelocity));
+calculatedZDistance = (cumtrapz(inertialData(:,1), calculatedZVelocity));
 
 %% Extract sampling period selected during acquisition
 readScript = readlines('record_kinematics.py')';
@@ -119,7 +119,7 @@ title('z-axis acceleration')
 xlabel('time [seconds]')
 ylabel('velocity [m/s]')
 subplot(4,3,12)
-plot(recordedTime, zDistance, 'b')
+plot(recordedTime, calculatedZDistance, 'b')
 title('z-axis position')
 xlabel('time [seconds]')
 ylabel('distance [m]')
