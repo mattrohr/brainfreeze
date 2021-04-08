@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Checkout LFS objects
+        run: git lfs pull
       - name: Install MATLAB
         uses: matlab-actions/setup-matlab@v0
       - name: Run script
