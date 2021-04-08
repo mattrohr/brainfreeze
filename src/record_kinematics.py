@@ -23,7 +23,9 @@ from picamera import PiCamera
 external_drive = "/media/pi/Seagate/compensation-stage/data/raw/"
 experiment_time = time.strftime("%Y%m%d-%H%M%S")
 experiment_type = "_sensor-orbit_100RPM"
+rawfolder = experiment_time + experiment_type
 path = external_drive + experiment_time + experiment_type
+os.mkdir(external_drive)
 os.mkdir(path)
 
 camera = PiCamera()
@@ -57,6 +59,4 @@ while True:
 
     f = open(filename,'a')
     f.write("%0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n" % (t, accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, mag_x, mag_y, mag_z, quat_w, quat_i, quat_j, quat_k))
-    #print("%0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n" % (t, accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, mag_x, mag_y, mag_z, quat_w, quat_i, quat_j, quat_k))
-    #print("%0.6f %0.6f %0.6f %0.6f\n" %(t, mag_x, mag_y, mag_z))
     f.close()

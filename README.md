@@ -25,9 +25,16 @@ chmod u+x ger_sensor_data.py
 ```
 
 ## Usage
-1. record data
+1. Download demo data with:
+```bash
+git lfs pull
 ```
-./record_movement
+
+2. Results should match `data/final`
+
+3. Record your own data with:
+```python
+./record_movement.py
 ```
 
 ## Notes
