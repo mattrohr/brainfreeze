@@ -34,7 +34,7 @@ git lfs pull
 
 3. Record your own data with:
 ```python
-./record_movement.py
+./record_kinematics.py
 ```
 
 ## Notes

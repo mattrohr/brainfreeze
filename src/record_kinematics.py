@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #########################################################################################################
-# record_movement.py reads and plots inertial measurement unit data (i.e. Adafruit BNO085 sensor) in format:
+# record_kinematics.py reads and plots inertial measurement unit data (i.e. Adafruit BNO085 sensor) in format:
 #
 # |--- [s] --|-------- [m/s^2] ------|-------- [rads/s] --------|--------- [uT] --------|---------------------------------|
 # 0           1       2       3       4        5        6        7       8       9       10       11       12       13
