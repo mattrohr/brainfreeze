@@ -31,7 +31,7 @@ plot(xq, interpolatedAcceleration(:,2), 'g')
 plot(xq, interpolatedAcceleration(:,3), 'b')
 xlabel('time [seconds]')
 ylabel('acceleration [m/s^2]')
-legend('x', 'y', 'z')
+legend('x-axis', 'y-axis', 'z-axis')
 
 %% Compute FFT
 samplingFrequency = 1 / samplingPeriod;
@@ -49,16 +49,16 @@ P1(2:end-1) = 2 * P1(2:end-1);
 frequency = samplingFrequency * (0:(signalLength / 2)) / signalLength;
 figure()
 plot(frequency,P1)
-title('Single-Sided Amplitude Spectrum of X(t)')
+title('Single-Sided Amplitude Spectrum of acceleration(t)_x')
 xlabel('f (Hz)')
 ylabel('|P1(f)|')
+legend('x-axis')
 
 %% Design highpass filter
 % minimumorder, FIR, density factor = 20, Fstop = 0.5, Fpass = 1
 
 Hd = load('Hd.mat');
 filteredXAcceleration = filter(Hd.Hd, unfilteredXAcceleration);
-figure()
 %plot(interpolatedTime, filteredAcceleration)
 %title('Filtered z-acceleration');
 %xlabel('t [seconds]');
@@ -67,54 +67,54 @@ figure()
 %% Plot Raw Kinematics
 figure()
 sgtitle('Raw IMU Kinematics')
-% X-axis
+% x-axis
 subplot(3,3,1)
 plot(recordedTime, recordedAcceleration(:,1), 'r')
-title('X-axis acceleration')
+title('x-axis acceleration')
 xlabel('time [seconds]')
 ylabel('acceleration [m/s^2]')
 subplot(3,3,2)
 plot(recordedTime, calculatedXVelocity, 'r')
-title('X-axis velocity')
+title('x-axis velocity')
 xlabel('time [seconds]')
 ylabel('velocity [m/s]')
 subplot(3,3,3)
 plot(recordedTime, calculatedXDistance, 'r')
-title('X-axis position')
+title('x-axis position')
 xlabel('time [seconds]')
 ylabel('distance [m]')
 
-% Y-axis
+% y-axis
 subplot(3,3,4)
 plot(recordedTime, recordedAcceleration(:,2), 'g')
-title('Y-axis acceleration')
+title('y-axis acceleration')
 xlabel('time [seconds]')
 ylabel('acceleration [m/s^2]')
 subplot(3,3,5)
 plot(recordedTime, calculatedYVelocity, 'g')
-title('Y-axis velocity')
+title('y-axis velocity')
 xlabel('time [seconds]')
 ylabel('velocity [m/s]')
 subplot(3,3,6)
 plot(recordedTime, calculatedYDistance, 'g')
-title('Y-axis position')
+title('y-axis position')
 xlabel('time [seconds]')
 ylabel('distance [m]')
 
-% Z-axis
+% z-axis
 subplot(3,3,7)
 plot(recordedTime, recordedAcceleration(:,3), 'b')
-title('Z-axis velocity')
+title('z-axis velocity')
 xlabel('time [seconds]')
 ylabel('acceleration [m/s^2]')
 subplot(3,3,8)
 plot(recordedTime, calculatedZVelocity, 'b')
-title('Z-axis acceleration')
+title('z-axis acceleration')
 xlabel('time [seconds]')
 ylabel('velocity [m/s]')
 subplot(3,3,9)
 plot(recordedTime, calculatedZDistance, 'b')
-title('Z-axis position')
+title('z-axis position')
 xlabel('time [seconds]')
 ylabel('distance [m]')
 
@@ -122,66 +122,66 @@ ylabel('distance [m]')
 figure()
 sgtitle('Filtered IMU Kinematics')
 
-% X-Axis
+% x-axis
 subplot(3,3,1)
 unfilteredXAcceleration = interpolatedAcceleration(:,1)';
 filteredXAcceleration = filter(Hd.Hd, unfilteredXAcceleration);
 filteredXVelocity = -cumtrapz(interpolatedTime', filteredXAcceleration);
 filteredXDistance = detrend(cumtrapz(interpolatedTime', filteredXVelocity),2);
 plot(interpolatedTime, filteredXAcceleration, 'r')
-title('X-axis acceleration')
+title('x-axis acceleration')
 xlabel('time [seconds]')
 ylabel('acceleration [m/s^2]')
 subplot(3,3,2)
 plot(interpolatedTime, filteredXVelocity, 'r')
-title('X-axis velocity')
+title('x-axis velocity')
 xlabel('time [seconds]')
 ylabel('velocity [m/s]')
 subplot(3,3,3)
 plot(interpolatedTime, filteredXDistance, 'r')
-title('X-axis position')
+title('x-axis position')
 xlabel('time [seconds]')
 ylabel('distance [m]')
 
-% Y-Axis
+% y-axis
 subplot(3,3,4)
 unfilteredYAcceleration = interpolatedAcceleration(:,2)';
 filteredYAcceleration = filter(Hd.Hd, unfilteredYAcceleration);
 filteredYVelocity = -cumtrapz(interpolatedTime', filteredYAcceleration);
 filteredYDistance = detrend(cumtrapz(interpolatedTime', filteredYVelocity),2);
 plot(interpolatedTime, filteredYAcceleration, 'g')
-title('Y-axis acceleration')
+title('y-axis acceleration')
 xlabel('time [seconds]')
 ylabel('acceleration [m/s^2]')
 subplot(3,3,5)
 plot(interpolatedTime, filteredYVelocity, 'g')
-title('Y-axis velocity')
+title('y-axis velocity')
 xlabel('time [seconds]')
 ylabel('velocity [m/s]')
 subplot(3,3,6)
 plot(interpolatedTime, filteredYDistance, 'g')
-title('Y-axis position')
+title('y-axis position')
 xlabel('time [seconds]')
 ylabel('distance [m]')
 
-% Z-Axis
+% z-axis
 subplot(3,3,7)
 unfilteredZAcceleration = interpolatedAcceleration(:,3)';
 filteredZAcceleration = filter(Hd.Hd, unfilteredZAcceleration);
 filteredZVelocity = cumtrapz(interpolatedTime', filteredZAcceleration);
 filteredZDistance = detrend(cumtrapz(interpolatedTime', filteredZVelocity),2);
 plot(interpolatedTime, filteredXAcceleration, 'b')
-title('Z-axis acceleration')
+title('z-axis acceleration')
 xlabel('time [seconds]')
 ylabel('acceleration [m/s^2]')
 subplot(3,3,8)
 plot(interpolatedTime, filteredZVelocity, 'b')
-title('Z-axis velocity')
+title('z-axis velocity')
 xlabel('time [seconds]')
 ylabel('velocity [m/s]')
 subplot(3,3,9)
 plot(interpolatedTime, filteredZDistance, 'b')
-title('Z-axis position')
+title('z-axis position')
 xlabel('time [seconds]')
 ylabel('distance [m]')
 
@@ -189,4 +189,3 @@ countedPeaks = numel(findpeaks(filteredXDistance(:,30001:end)))
 oscillationTime = length(interpolatedTime(:,30001:end))*samplingPeriod;
 oscillationFrequency = 1.69688; % from FFT
 expectedPeaks = oscillationTime * oscillationFrequency
-

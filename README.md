@@ -13,7 +13,7 @@
 </p>
 
 ## About
-When imaging the brain, breathing causes the image to drift in and out of focus. This repository measures this motion and counteracts it in realtime.  This change in path-length also means light waves interfere at different depths, resulting in an apparent noise.
+Brains are important<sup>1, 2</sup>. When imaging the brain, breathing causes the image to drift in and out of focus. This repository measures this motion and counteracts it in realtime.  This change in path-length also means light waves interfere at different depths, resulting in an apparent noise.
 
 ## Installation
 1. Install raspberry pi imager https://www.raspberrypi.org/software/
@@ -21,11 +21,11 @@ When imaging the brain, breathing causes the image to drift in and out of focus.
 3. https://learn.adafruit.com/adafruit-9-dof-orientation-imu-fusion-breakout-bno085?view=all
 4. give python script executable permissions with
 ```
-chmod u+x ger_sensor_data.py
+chmod u+x record_kinematics.py
 ```
 
 ## Usage
-1. Download demo data with:
+1. Download demo data (~100MB) with:
 ```bash
 git lfs pull
 ```
