@@ -30,7 +30,7 @@ chmod u+x record_kinematics.py
 git lfs pull
 ```
 
-2. Results should match `[`data/final`](./data/final)`
+2. Results should match [`data/final`](./data/final)
 
 3. Record your own data with:
 ```python
