@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-<b>Stabilize brain imaging motion</b>
+<b>Stabilize brain motion while imaging</b>
 </p>
 
 <p align="center">
@@ -18,7 +18,7 @@ When imaging the brain, breathing causes image shift <sup>[1](https://pubmed.ncb
 ## Installation
 1. Purchase [bill of materials](./docs/bom.md)
 2. [Image and configure operating system on acquisition computer](https://learn.adafruit.com/circuitpython-on-raspberrypi-linux/installing-circuitpython-on-raspberry-pi)
-3. [Connect acquisition computer and inertial measurement unit](https://learn.adafruit.com/adafruit-9-dof-orientation-imu-fusion-breakout-bno085/python-circuitpython). It does not matter which female connector you choose.
+3. [Connect inertial measurement unit to acquisition computer](https://learn.adafruit.com/adafruit-9-dof-orientation-imu-fusion-breakout-bno085/python-circuitpython). It does not matter which female connector you choose.
 4. Copy this repository on both host computer and acquisition computer:
 ```bash
 git clone https://github.com/mattrohr/compensation-stage.git
@@ -29,14 +29,19 @@ chmod u+x ./src/record_kinematics.py
 ```
 6. Sterilize components with alcohol wipes to minimize infection risk.
 
-7. Attach IMU sensor 3M double-sided adhesive square. The sensor has an orientation compass on the bottom right. Position the compass so it faces up, X points to the right ear, Y points to the snout, and the sensor is close to the imaging area.
+7. Wait a few seconds until boards dry, then apply black gaffer tape to red raspberry pi and green IMU LED status indicators to prevent contaminating oxygenation measurement.
+
 <img align="right" width="50%" crop src="https://i.imgur.com/xJVPfHU.jpg" alt="IMU sensor orientation">
+
+8. Attach IMU sensor 3M double-sided adhesive square. The sensor has an orientation compass on the bottom right. Position the compass so it faces up, X points to the right ear, Y points to the snout, and the sensor is close to the cranial window. Ideally this area should be shaven for a more secure fit.
 
 ## Usage
 1. Run the demo with provided sample data. Results are located in [`data/final`](./data/final/20210408-190706_sensor-orbit_100RPM).
 ```bash
 matlab -nodisplay -nosplash -nodesktop -r "run('./src/calculate_kinematics.m');exit;" 
 ```
+
+[test](<src="https://dc.uwm.edu/cgi/viewcontent.cgi?article=2584&context=etd#page=4" alt="IMU sensor orientation">)
 
 2. Log into acquisition computer and record your own data:
 ```python
@@ -53,25 +58,41 @@ ssh pi@raspberrypi
 
 ## Notes
 Design Considerations:
-- Sensor selection: IMU
+- Sensor: IMU
+    - IMU: cheap ($20), ease of assembly because it's solder-less, fast sampling rate (500 [Hz]) which is well above Nyquist sampling rate 2.84 [Hz] (2 * [expected motion of 85 breaths per minute](http://web.jhu.edu/animalcare/procedures/rat.html) / 60 seconds)
     - LIDAR: may interfere with already-crowded spectrum (red/green for oxygenation, blue for optogenetic stimulation, red also for blood velocity, infrared for OCT). We could choose a LIDAR unit that emits at a different wavelength, but no access to our power meter to verify emission spectrum.
-    - magnetometer / hall sensor: The sensor was easily saturated with our magnets, so the working range was limited. [Hemoglobin is magnetic](https://twitter.com/rainmaker1973/status/1019877124952481792), so a strong magnet may disrupt one of the measurements we're making.
-    - test indicator: Mitotoyo ID-C has most frequent sampling and is slower than our IMU (100 [Hz] vs 500 [Hz]), expensive ($200 vs $20), [susceptible to cosine effect](https://www.mitutoyo.co.jp/eng/products/menu/QuickGuide_Dial-Indicators.pdf)
+    - magnetometer / hall sensor: The sensor has a limited working range--[our magnets](https://www.amazon.com/gp/product/B01I1XNV0I/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1) easily saturated the sensor or because field-strength falls off by the inverse square law, were quickly undetectable. [Hemoglobin is magnetic](https://twitter.com/rainmaker1973/status/1019877124952481792), so a strong magnet may disrupt one of the measurements we're making.
+    - test indicator: Mitotoyo ID-C digital read out and has the most frequent sampling, but it's still slower than our IMU (100 [Hz] vs 500 [Hz]), expensive ($200 vs $20 IMU), [susceptible to cosine effect](https://www.mitutoyo.co.jp/eng/products/menu/QuickGuide_Dial-Indicators.pdf), only measures 1-D.
     - [motion capture suit](https://en.wikipedia.org/wiki/Motion_capture)
-    - GPS: good for ±1 meter, not [mm], [um], or [nm]
+    - ultrasonic sensor: limited working range because of the conical beam. Also the emission point is at a different point than the detection path. Because we're measuring a curved object, the distance we'd read would not be the real distance. Cheap off-the-shelf models are only accurate to around a couple [cm], insufficient for our purposes.
+    - OCT feedback
+    - GPS: good for ±1 [m], not [mm], [um], or [nm]
 - Redundant method: camera
 - Sensor mounting
-    - double sided tape
+    - medical-grade tape: [Nitto ST-2604](https://www.nitto.com/us/en/products/medical/003/) is breathable and non-irritating but difficult to source. You have to buy cases instead of individual rolls. Same story for 3M equivalents.
     - snap connector: difficult to source, digikey doesn't stock them. Alibaba does. But now instead of figuring out how to mount the sensor to the rodent, we just push off the problem and now have to figure out how best to attach the snap connector to the sensor.
-    - veterinary glue
+    - veterinary glue:
+    - single sided athletic tape:
+    - double sided foam adhesive squares:
+- stabilization method
+    - optical stabilization (move lens)
+    - in-body stabilization (move sensor)
+    - digital stabilization (move objective)
+    - subject stabilization (this method)
 - Sensor sampling period: nyquist sampling frequency
 - Stage resolution
 - Stage response time
 - Stage speed
-- Stage vertical load capacity: > 17 [lbs]. Sterotaxic holder is ~15 [lbs], adult lab rats are ~1-2lbs.
+- Stage vertical load capacity: > 17 [lbs] because Kopf stereotaxic holder is about 15 [lbs], adult lab rats are about 1 to 2 [lbs].
 - FFT filter type and parameters: highpass
 
 Drawbacks:
-
+    - accumulating error because we're integrating acceleration twice. 
+    - induced motor motion
+    - sampling time: irregular, interpolation necessary.
+    - inertia of stage
+    - sensor is big, and is too big for smaller specimen this system could be used for.
+    - sensor only measures global shift or shift in one local area, not local areas across specimen.
+    
 ## Acknowledgements
 - [Luis Prado](https://thenounproject.com/search/?q=paparazzi&i=881234) and [Emily Baker](https://thenounproject.com/search/?q=paparazzi&i=881234) for their icons.
