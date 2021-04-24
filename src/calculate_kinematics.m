@@ -188,4 +188,4 @@ ylabel('distance [m]')
 countedPeaks = numel(findpeaks(filteredXDistance(:,30001:end)))
 oscillationTime = length(interpolatedTime(:,30001:end))*samplingPeriod;
 oscillationFrequency = 1.69688; % from FFT
-expectedPeaks = oscillationTime * oscillationFrequency
+expectedPeaks = round(oscillationTime * oscillationFrequency,0)
