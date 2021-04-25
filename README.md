@@ -60,10 +60,10 @@ ssh pi@raspberrypi
 6. Sterilize components again with alcohol wipe to remove tape residue and contaminants.
 
 ## Notes
-Design Considerations:
+**Design Considerations:**
 - Sensor:
-    - IMU: cheap ($20), ease of assembly because it's solder-less, fast sampling rate (500 [Hz]) which is well above Nyquist sampling rate 2.84 [Hz] (2 * [expected motion of 85 breaths per minute](http://web.jhu.edu/animalcare/procedures/rat.html) / 60 seconds)
-    - LIDAR and photogrammetry: may interfere with already-crowded spectrum (red/green for oxygenation, blue for optogenetic stimulation, red also for blood velocity, infrared for OCT). We could choose a LIDAR unit that emits at a different wavelength, but no access to our power meter to verify emission spectrum.
+    - IMU: cheap ($20), ease of assembly because it's solder-less, fast sampling rate (500 [Hz]) which is well above Nyquist sampling rate 2.84 [Hz] (2 * [expected motion of 85 breaths per minute](http://web.jhu.edu/animalcare/procedures/rat.html) / 60 seconds), minimally invasive
+    - LIDAR and laser distance meter: may interfere with already-crowded spectrum (red/green for oxygenation, blue for optogenetic stimulation, red also for blood velocity, infrared for OCT). We could choose a LIDAR unit that emits at a different wavelength, but no access to our power meter to verify emission spectrum.
     - magnetometer / hall sensor: The sensor has a limited working range--[our magnets](https://www.amazon.com/gp/product/B01I1XNV0I/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1) easily saturated the sensor. Field-strength quickly dropped as magnet moved away and undetectable because inverse square law. [Hemoglobin is magnetic](https://twitter.com/rainmaker1973/status/1019877124952481792), so a strong magnet may disrupt one of the measurements we're making.
     - test indicator / dial indicator: [test indicator is susceptible to cosine effect](https://www.mitutoyo.co.jp/eng/products/menu/QuickGuide_Dial-Indicators.pdf#page=4), [Mitutoyo ID-C](https://www.amazon.com/Mitutoyo-543-392B-Digimatic-Resolution-Specifications/dp/B002SG7PI4/ref=sr_1_1?dchild=1&keywords=mitutoyo+id-c&qid=1619141916&sr=8-1) digital read out and has the most frequent sampling, but it's still slower than our IMU (100 [Hz] vs 500 [Hz]), expensive ($400 vs $20 IMU), only measures 1-D. Starett said their fastest sampling rate was once every 5 seconds--seems too slow, my question was probably misunderstood.
     - [motion capture suit](https://en.wikipedia.org/wiki/Motion_capture): we don't need full body motion, just cortex motion. So we'd need several reflective orbs around an area already-packed with life support equipment.
@@ -71,9 +71,10 @@ Design Considerations:
     - OCT feedback
     - Radar
     - GPS: good for ±1 [m], not [mm], [um], or [nm]
+- Sensor disinfection: 99% alcohol wipes have low water content, so unlikely to short or corrode sensor. But that also means they quickly evaporate, so several might need to be applied to clean biological contamination. They're individually wrapped for sanitary environments. 
 - Redundant method: camera
 - Sensor mounting
-    - medical-grade tape: [Nitto ST-2604](https://www.nitto.com/us/en/products/medical/003/) is breathable and non-irritating but difficult to source. You have to buy cases instead of individual rolls. Same story for 3M equivalents.
+    - medical-grade tape: [Nitto ST-2604](https://www.nitto.com/us/en/products/medical/003/) is breathable, non-irritating, has goldilocks tensile strength. But difficult to source on manufacturer, findtape, amazon, eBay, box stores, and elsewhere. You have to buy cases instead of individual rolls. Same story for 3M equivalents. Requested samples.
     - normal double sided tape: too high tensile strength will rip PCB pads and/or skin, cause skin irritation, non-breathable so moisture buildup and subsequent detachment
     - snap connector: difficult to source, Digi-key doesn't stock them. [Alibaba does](https://www.alibaba.com/product-detail/PCB-electrode-button-Medical-button-snap_60687245853.html). But now instead of figuring out how to mount the sensor to the rodent, we just push off the problem and now have to figure out how best to attach the snap connector to the sensor.
     - [veterinary glue](https://www.amazon.com/3M-Vetbond-084-1469SB-Vetbond-Tissue-Adhesive-1469Sb/dp/B004C12Q46):
@@ -85,23 +86,30 @@ Design Considerations:
     - digital stabilization (move objective)
     - subject stabilization (this method)
 - Sensor sampling period: Nyquist sampling frequency
+- Sensor accuracy:
 - Stage resolution
 - Stage response time
 - Stage speed
 - Stage vertical load capacity: > 17 [lbs] because Kopf stereotaxic holder is about 15 [lbs], adult lab rats are about 1 to 2 [lbs].
 - FFT filter type and parameters: highpass
+- other sources of motion than breathing: heart beat, muscular and tendon flexion and extension, optogenetic stimulation galvo jitter, external. One IMU will measure all movement that rodent experiences. To isolate external noise (e.g. IV pump), individual IMUs can be placed on or near them (e.g. table) to determine their frequency for filtering.
 
-Drawbacks:
-- Because we're integrating acceleration to calculate position, we're also accumulating sensor bias. Overtime the sensor reading will drift away from the true value. However because breathing is cyclic, we have a lower and upper bound on displacement in X- Y- and Z-axes. For example, we can detrend by assigning all troughs a value of zero, and likewise for signal peaks. <img align="right" width="50%" crop src="https://i.imgur.com/YwBZfIa.png" alt="IMU sensor drift"> Nevertheless.
+**Drawbacks:**
+- IMU drift: Because we're integrating acceleration to calculate position, we're also accumulating sensor bias. Overtime the sensor reading will drift away from the true value. However because breathing is cyclic, we have a lower and upper bound on displacement in X- Y- and Z-axes. Therefore we can detrend by assigning all troughs a value of zero, and likewise for signal peaks. <img align="right" width="50%" crop src="https://i.imgur.com/YwBZfIa.png" alt="IMU sensor drift"> Nevertheless, displacement readings between peaks and troughs will have uncertainty because of sensor drift. 
 
- position accumulating error because we're integrating acceleration twice. 
-- induced motor motion
-- sampling time: irregular, interpolation necessary.
-- inertia of stage
-- sensor is big, and is too big for smaller specimen this system could be used for.
-- IMU only measures bulk motion and the stage can only correct for bulk motion, not localized micro-motion.
-- brain is curved, IMU measures kinematics at only one point... This compensates bulk motion... Could add multiple IMU's, but more likely, LIDAR.
+- induced motor motion: as long as the motor doesn't induce more motion than the motion we're correcting for. Thorlabs stuff seems quite good (insert measurement). But note that Boas said even 1um is a lot for OCT. inertia of stage
+
+- non-uniform sampling time: Because of Python sleep() function and/or lack of timing chip, time between recordings is irregular. Our fast Fourier transform needs these evenly-spaced samples, so we interpolate time and acceleration readings. Since our selected inertial measurement unit's sampling rate (500 [Hz]) is more than Nyquist sampling rate (about 3 [Hz]), we capture all expected dynamics. The interpolated data between recorded results are likely similar to true motion.
+
+- non-uniform stage travel: flatness, straightness, roll, pitch, yaw
+
+- system initialization 
+
+- calibration: The IMU's reference frame depends on gravity and magnetic north. Down is opposite gravitational field. East is cross product of down and measured magnetic field. North is cross product of down and east. This means magnetic objects may distort headings. Gravity strength and [magnetic north change slow]((https://geomag.bgs.ac.uk/images/igrf/dIcolourful.jpg)) enough to be negligible.
+
+- bulk vs local motion: Because an IMU only collects kinematics at one point, and a stage can only move the entire rodent, only bulk motion can be compensated for with this design. As [Boas' team noted, bulk was the most significantly detected motion](https://pubmed.ncbi.nlm.nih.gov/22108978/). This bulk motion may be drowning out local motion. If we compensate for the bulk motion mechanically, their algorithm may still be to complement this system by detecting and compensating for local motion. Additional IMUs may add redundancy, but several, modern off-the-shelf boards are be too big to fit near cranial window. 
 
 Current state of project noted in [issues](https://github.com/mattrohr/compensation-stage/issues).
 ## Acknowledgements
-- [Luis Prado](https://thenounproject.com/search/?q=paparazzi&i=881234) and [Emily Baker](https://thenounproject.com/search/?q=paparazzi&i=881234) for their icons.
+- [Hadi Esfandi](https://linkedin.com/in/hadi-esfandi-ab004877) and [Mahshad Javidan](https://linkedin.com/in/mahshad-javidan-a0705677) for feedback on an earlier design
+- [Luis Prado](https://thenounproject.com/search/?q=paparazzi&i=881234) and [Emily Baker](https://thenounproject.com/search/?q=paparazzi&i=881234) for their icons
