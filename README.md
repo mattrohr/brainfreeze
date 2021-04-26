@@ -13,8 +13,7 @@
 </p>
 
 ## About
-When imaging the brain, breathing causes image shift <sup>[1](https://pubmed.ncbi.nlm.nih.gov/22108978/)</sup> and may cause the image to drift in and out of focus. This repository includes hardware and software to counteract this motion in realtime. <img align="right" width="50%" crop src="https://i.imgur.com/SWLO5wa.png" alt="IMU sensor orientation">
-
+When imaging the brain, breathing causes image shift <sup>[1](https://pubmed.ncbi.nlm.nih.gov/22108978/)</sup> and may cause the image to [drift in and out of focus](https://en.wikipedia.org/wiki/Autofocus#Passive). This repository includes hardware and software to counteract this motion in realtime. <img align="right" width="50%" crop src="https://i.imgur.com/4pPsJX2.png" alt="IMU sensor orientation">
 
 ## Installation
 1. Purchase [bill of materials](./docs/BOM.xlsx)
@@ -33,13 +32,13 @@ git clone https://github.com/mattrohr/compensation-stage.git
 ```
 chmod u+x ./src/record_kinematics.py
 ```
-6. Sterilize components with alcohol wipes to minimize infection risk. Because of the low water content in 99% alcohol wipes, evaporation is quick and you may need to use several wipes. 
+6. Sterilize components with alcohol wipes to minimize infection risk. Because of the low water content in 99% alcohol wipes, evaporation is quick and you may need to use several wipes. Also wipe camera lens to remove smudges.
 
 7. After board dries, apply black gaffer tape to red raspberry pi and green IMU LED status indicators to prevent contaminating oxygenation measurement.
 
 <img align="right" width="50%" crop src="https://i.imgur.com/xJVPfHU.jpg" alt="IMU sensor orientation">
 
-8. Attach IMU sensor Scotch double-sided adhesive square. The sensor has an orientation compass on the bottom right. Position the compass so it faces up, Y points to the snout, X points to the right ear, and the sensor is close to the cranial window. Ideally this area should be shaven for a secure fit.
+8. Attach IMU sensor to Scotch double-sided adhesive square. The sensor has an orientation compass on the bottom right. Position the compass so it faces up, Y points to the snout, X points to the right ear, and the sensor is close to the cranial window. Ideally this area should be shaven for a secure fit.
 
 ## Usage
 1. Run the demo with provided sample data. Results are located in [`data/final`](./data/final/20210408-190706_sensor-orbit_100RPM).
@@ -64,35 +63,37 @@ ssh pi@raspberrypi
 **Design Considerations:**
 - Sensor:
     - IMU: cheap ($20), ease of assembly because it's solder-less, fast sampling rate (500 [Hz]) which is well above Nyquist sampling rate 2.84 [Hz] (2 * [expected motion of 85 breaths per minute](http://web.jhu.edu/animalcare/procedures/rat.html) / 60 seconds), minimally invasive
-    - LIDAR and laser distance meter: may interfere with already-crowded spectrum (red/green for oxygenation, blue for optogenetic stimulation, red also for blood velocity, infrared for OCT). We could choose a LIDAR unit that emits at a different wavelength, but no access to our power meter to verify emission spectrum.
-    - magnetometer / hall sensor: The sensor has a limited working range--[our magnets](https://www.amazon.com/gp/product/B01I1XNV0I/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1) easily saturated the sensor. Field-strength quickly dropped as magnet moved away and undetectable because inverse square law. [Hemoglobin is slightly magnetic](https://twitter.com/rainmaker1973/status/1019877124952481792), so a strong magnet may disrupt one of the measurements we're making.
-    - test indicator / dial indicator: [test indicator is susceptible to cosine effect](https://www.mitutoyo.co.jp/eng/products/menu/QuickGuide_Dial-Indicators.pdf#page=4), [Mitutoyo ID-C](https://www.amazon.com/Mitutoyo-543-392B-Digimatic-Resolution-Specifications/dp/B002SG7PI4/ref=sr_1_1?dchild=1&keywords=mitutoyo+id-c&qid=1619141916&sr=8-1) digital read out and has the most frequent sampling, but it's still slower than our IMU (100 [Hz] vs 500 [Hz]), expensive ($400 vs $20 IMU), only measures 1-D. Starett said their fastest sampling rate was once every 5 seconds--seems too slow, my question was probably misunderstood.
+    - LIDAR, laser distance meter, time of flight: may interfere with already-crowded spectrum (red/green for oxygenation, blue for optogenetic stimulation, red also for blood velocity, infrared for OCT). We could choose a LIDAR unit that emits at a different wavelength, but no access to our power meter to verify emission spectrum.
+    - magnetometer / hall sensor: The sensor has a limited working range--[our magnets](https://www.amazon.com/gp/product/B01I1XNV0I/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1) easily saturated the sensor. Working range was between 125 [mm] and 152 [mm] from sensor. Field-strength quickly dropped as magnet moved away and undetectable because inverse square law. [Hemoglobin is slightly magnetic](https://twitter.com/rainmaker1973/status/1019877124952481792), so a strong magnet may disrupt one of the measurements we're making.
+    - test indicator / dial indicator: [test indicator is susceptible to cosine effect](https://www.mitutoyo.co.jp/eng/products/menu/QuickGuide_Dial-Indicators.pdf#page=4), [Mitutoyo ID-C](https://www.amazon.com/Mitutoyo-543-392B-Digimatic-Resolution-Specifications/dp/B002SG7PI4/ref=sr_1_1?dchild=1&keywords=mitutoyo+id-c&qid=1619141916&sr=8-1) digital read out and has the most frequent sampling, but it's still slower than our IMU (100 [Hz] vs 500 [Hz]), expensive ($400 vs $20 IMU), only measures 1-D. Starett said their fastest sampling rate was once every 5 seconds--seems too slow, my question was probably misunderstood. May measure IMU angle to compensate cosine effect from test indicator measurement.
     - [motion capture suit](https://en.wikipedia.org/wiki/Motion_capture): we don't need full body motion, just cortex motion. So we'd need several reflective orbs around an area already-packed with life support equipment.
     - ultrasonic sensor: limited working range because of the conical beam. Also the emission point is at a different point than the detection path. Because we're measuring a curved object, the distance we'd read would not be the real distance. Cheap off-the-shelf models are only accurate to around a couple [cm], insufficient for our purposes.
-    - OCT, IOS, LSCI feedback: This is perhaps the most interesting and promising approach. annotate images, kalman filter
-    - Radar
-    - GPS: good for ±1 [m], not [mm], [μm], or [nm]
+    - OCT (IR or alignment laser), IOS, LSCI feedback: We can use our other systems to infer motion, like [measuring field of view and calculating pixel dimensions](https://github.com/Bio-Inspired-Sciences-and-Technologies/cerebral-hemodynamics/blob/main/documentation/calibration/calibration.md) or [comparing successive OCT B-Scans](https://pubmed.ncbi.nlm.nih.gov/22108978/). But because we're not measuring distance directly, we need to statistically guess how much brightening and dimming of pixels corresponds to how much movement. If we continue to compare successive images, we're **digitally** compensating for **bulk motion** that has **already** happened. Micro-vasculature features, like tiny capillaries, may be lost. We could fuse these distance sensors with a Kalman filter for a better estimate. We could annotate images with IMU-calculated distances for neural network training.
+    - Radar and GPS: good for ±1 [m], not [mm], [μm], or [nm]
 - Sensor disinfection: 99% alcohol wipes have low water content, so unlikely to short or corrode sensor. But that also means they quickly evaporate (~2 [seconds]), so several might need to be applied to clean biological contamination. They're individually wrapped for sanitary environments. 
-- Redundant method: camera
+- Redundant method: camera facing a backdrop with subject in foreground. The has precisely printed black and white grid (or [even this system](https://patents.google.com/patent/US10869611B2/en?q=%22Motion+tracking+system+for+real+time+adaptive+imaging+and+spectroscopy%22&oq=%22Motion+tracking+system+for+real+time+adaptive+imaging+and+spectroscopy%22&sort=new)). Distance is measured optically with [`src/distance_tool.m`](./src/distance_tool.m). Limited by frame rate, ours is ours is 24 FPS (vs IMU vs 500 [Hz]) and only measures 2-D (vs IMU 3-D). Used as a sanity check on IMU measurement.
 - Sensor mounting
     - medical-grade tape: [Nitto ST-2604](https://www.nitto.com/us/en/products/medical/003/) is breathable, non-irritating, has goldilocks tensile strength. But difficult to source on manufacturer, findtape, amazon, eBay, box stores, and elsewhere. You have to buy cases instead of individual rolls. Same story for 3M equivalents. Requested samples.
-    - normal double sided tape: too high tensile strength will rip PCB pads and/or skin, cause skin irritation, non-breathable so moisture buildup and subsequent detachment
+    - [normal double sided tape](http://www.findtape.com/product190/Permacel-P-02-Double-Coated-Kraft-Paper-Tape.aspx): too high tensile strength will rip PCB pads and/or skin, cause skin irritation, non-breathable so moisture buildup and subsequent detachment
     - snap connector: difficult to source, Digi-key doesn't stock them. [Alibaba does](https://www.alibaba.com/product-detail/PCB-electrode-button-Medical-button-snap_60687245853.html). But now instead of figuring out how to mount the sensor to the rodent, we just push off the problem and now have to figure out how best to attach the snap connector to the sensor.
     - [veterinary glue](https://www.amazon.com/3M-Vetbond-084-1469SB-Vetbond-Tissue-Adhesive-1469Sb/dp/B004C12Q46): May be suitable for permanently attaching a sacrificial surface to the rodent. This surface would have a less-permanent method for attaching the sensor.
     - single sided athletic tape: tape adhesion to sensor and skin may decrease at different rates (e.g. detaches from skin before sensor because of moisture build-up). We there may not be enough room because we lose surface area underneath sensor. If not applied with enough tape-tension, the sensor may flop around.
     - double sided foam adhesive squares: [Scotch Removable Mounting Square](https://www.amazon.com/Scotch-Brand-108-Removable-MOUNTNG/dp/B00099E8DM). Readily available at retail stores. 1 [lb] tensile strength seems adequately sticky. But because they're foam, they have 2 +/- 0.2 [mm] lateral and axial movement when squashed. They're pretty rigid, precut, perfectly sized, cheap. Adequate until we can source thinner, double-sided medical tape. No perceptible residue.
-- [stabilization method:](https://en.wikipedia.org/wiki/Image_stabilization)
-    - optical stabilization (move lens)
-    - in-body stabilization (move sensor)
-    - digital stabilization (move objective)
-    - subject stabilization (this method)
+- [stabilization method:](https://en.wikipedia.org/wiki/Image_stabilization#Techniques)
+    - in-body sensor-shift: Since we have more than one sensor, we'd need to have separate sensor stabilization mechanisms for each.
+    - optical lens-shift: only corrects for 2-D planar motion, not focusing or phase differences.
+    - digital (current method): difficult/impossible to correct motion blur
+    - subject (proposed method)
 - Sensor sampling period: Need at least 2.84 [Hz] + any other dynamics we want to determine. We could double sampling period by adding another sensor, and starting the second one half a sampling period after the first. Though this comes with a new set of challenges, how to address each sensor is measuring a different position on the head.
-- Sensor accuracy:
-- Stage resolution
+- Sensor accuracy: Shaker claims ±2% of set speed up to 999 [RPM]. At 100 [RPM] (i.e. 1.667 [Hz]) IMU sensor measured 1.69 [Hz]. If shaker _actually_ generated 100 [RPM], sensor is 1.3% accurate. 
 - Stage response time: Can't respond faster than the rate IMU reads (i.e. 500 [Hz]).
+
+The vertical load is the weight of the items secured to the plate when it is vertical and likewise for the horizontal load
+
+
 - Stage speed: to be determined, probably less than 3 [mm/s]
-- Stage vertical load capacity: >17 [lbs] because Kopf stereotaxic holder is about 15 [lbs], adult lab rats are about 1 to 2 [lbs].
-- FFT filter type and parameters: highpass
+- Stage vertical load capacity: >17 [lbs] because Kopf stereotaxic holder is about 15 [lbs], adult lab rats are about 1 to 2 [lbs]. The load capacity is the primary limiting factor in Thorlabs morotized stage selection. If these estimates are high [KVS30](https://www.thorlabs.com/newgrouppage9.cfm?objectgroup_id=13650) [NRT100](https://www.thorlabs.com/newgrouppage9.cfm?objectgroup_id=2131) may be suitable.
+- FFT filter type and parameters: Highpass filter because a lowpass would include the [0 [Hz] component](./data/final/20210408-190706_sensor-orbit_100RPM/FFT.png). Filter is very high order (e.g. 100k+) to squeeze between that 0 [Hz] component and expected 3 [Hz] breathing rate.
 - other sources of motion than breathing: heart beat, muscular and tendon flexion and extension, optogenetic stimulation galvo jitter, external. One IMU will measure all movement that rodent experiences. To isolate external noise (e.g. IV pump), individual IMUs can be placed on or near them (e.g. table) to determine their frequency for filtering.
 
 **Drawbacks:**
@@ -113,4 +114,5 @@ ssh pi@raspberrypi
 Current state of project noted in [issues](https://github.com/mattrohr/compensation-stage/issues).
 ## Acknowledgements
 - [Hadi Esfandi](https://linkedin.com/in/hadi-esfandi-ab004877) and [Mahshad Javidan](https://linkedin.com/in/mahshad-javidan-a0705677) for feedback on an earlier design
+- [Lex Kravitz](https://hackaday.io/project/163510-3d-printed-rodent-stereotaxic-device)
 - [Luis Prado](https://thenounproject.com/search/?q=paparazzi&i=881234) and [Emily Baker](https://thenounproject.com/search/?q=paparazzi&i=881234) for their icons
