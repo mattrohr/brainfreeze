@@ -88,7 +88,8 @@ ssh pi@raspberrypi
 - Sensor accuracy: Shaker claims ±2% of set speed up to 999 [RPM]. At 100 [RPM] (i.e. 1.667 [Hz]) IMU sensor measured 1.69 [Hz]. If shaker _actually_ generated 100 [RPM], sensor is 1.3% accurate. 
 - Stage response time: Can't respond faster than the rate IMU reads (i.e. 500 [Hz]).
 - Stage speed: to be determined, probably less than 3 [mm/s]
-- Stage vertical load capacity: >17 [lbs] because Kopf stereotaxic holder is about 15 [lbs], adult lab rats are about 1 to 2 [lbs]. The load capacity is the primary limiting factor in Thorlabs morotized stage selection. If these estimates are high [KVS30](https://www.thorlabs.com/newgrouppage9.cfm?objectgroup_id=13650) or [NRT100](https://www.thorlabs.com/newgrouppage9.cfm?objectgroup_id=2131) may be suitable.
+- Stage backlash: 6 [μm] (X-Y) to 50 [μm] (Z-axes), which is a lot. If these distances are less than the rat moves without compensation, motion would be dampened. Could be improved if we lighten sterotaxic stage from ~15 [lbs] to ~12 [lbs].
+- Stage vertical load capacity: >17 [lbs] because Kopf stereotaxic holder is about 15 [lbs], adult lab rats are about 1 to 2 [lbs]. The load capacity is the primary limiting factor in Thorlabs motorized stage selection. If these estimates are high or a lighter stage is be built into stage mounting holes, then [KVS30](https://www.thorlabs.com/newgrouppage9.cfm?objectgroup_id=13650) or [NRT100](https://www.thorlabs.com/newgrouppage9.cfm?objectgroup_id=2131) may be suitable. Also, current stage doesn't have mounting holes to attach to motorized stages.
 - FFT filter type and parameters: Highpass filter because a lowpass would include the [0 [Hz] component](./data/final/20210408-190706_sensor-orbit_100RPM/FFT.png). Filter is very high order (e.g. 100k+) to squeeze between that 0 [Hz] component and expected 3 [Hz] breathing rate.
 - other sources of motion than breathing: heart beat, muscular and tendon flexion and extension, optogenetic stimulation galvo jitter, external. One IMU will measure all movement that rodent experiences. To isolate external noise (e.g. IV pump), individual IMUs can be placed on or near them (e.g. table) to determine their frequency for filtering.
 
@@ -111,4 +112,4 @@ Current state of project noted in [issues](https://github.com/mattrohr/compensat
 ## Acknowledgements
 - [Hadi Esfandi](https://linkedin.com/in/hadi-esfandi-ab004877) and [Mahshad Javidan](https://linkedin.com/in/mahshad-javidan-a0705677) for feedback on an earlier design
 - [Lex Kravitz](https://scholar.google.com/citations?user=2uDuzk0AAAAJ&hl=en) for his placeholder [stereotaxic model](https://hackaday.io/project/163510-3d-printed-rodent-stereotaxic-device)
-- [Luis Prado](https://thenounproject.com/search/?q=paparazzi&i=881234) and [Emily Baker](https://thenounproject.com/search/?q=paparazzi&i=881234) for their icons
+- [Emily Baker](https://thenounproject.com/search/?q=paparazzi&i=881234) and [Luis Prado](https://thenounproject.com/search/?q=paparazzi&i=881234) for their icons
