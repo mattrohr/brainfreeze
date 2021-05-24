@@ -17,7 +17,6 @@
 
 When imaging the brain, breathing causes image shift <sup>[1](https://pubmed.ncbi.nlm.nih.gov/22108978/)</sup> and may cause the image to [drift in and out of focus](https://en.wikipedia.org/wiki/Autofocus#Passive). This repository includes [hardware](https://a360.co/2PpZkb5) and software to counteract this motion in realtime.
 
-<br />
 If this is helpful in your work, please cite:
 
     @misc{rohr2021compensationstage,
