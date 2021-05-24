@@ -16,6 +16,7 @@
 When imaging the brain, breathing causes image shift <sup>[1](https://pubmed.ncbi.nlm.nih.gov/22108978/)</sup> and may cause the image to [drift in and out of focus](https://en.wikipedia.org/wiki/Autofocus#Passive). This repository includes [hardware](https://a360.co/2PpZkb5) and software to counteract this motion in realtime. <img align="right" width="50%" crop src="https://i.imgur.com/4pPsJX2.png" alt="IMU sensor orientation">
 
 If this is helpful in your work, please cite:
+
     @misc{rohr2021compensationstage,
       author = {Matthew Rohr},
       title = {Compensation Stage},
