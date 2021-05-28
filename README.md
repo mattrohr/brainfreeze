@@ -53,13 +53,13 @@ chmod u+x ./src/record_kinematics.py
 8. Attach IMU sensor to Scotch double-sided adhesive square. The sensor has an orientation compass on the bottom right. Position the compass so it faces up, Y points to the snout, X points to the right ear, and the sensor is close to the cranial window. Ideally this area should be shaven for a secure fit.
 
 ## Usage
-1. Run the demo with provided sample data. Results are located in [`data/final`](./data/final/20210408-190706_sensor-orbit_100RPM).
+1. Run the demo with provided sample data. Results are located in [`data/final`](./data/final/20210408-190706_sensor-orbit_100RPM):
 ```bash
 matlab -nodisplay -nosplash -nodesktop -r "run('./src/calculate_kinematics.m');exit;" 
 ```
 
 2. Log into acquisition computer and record your own data:
-```python
+```bash
 ssh pi@raspberrypi
 ./src/record_kinematics.py
 ```
